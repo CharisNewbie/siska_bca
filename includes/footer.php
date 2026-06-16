@@ -1,4 +1,11 @@
-</main>
+<?php
+/**
+ * SISKA BCA - Footer Template
+ * Include di akhir setiap halaman
+ */
+?>
+
+    </main>
     <!-- / Page Content -->
 
 </div>

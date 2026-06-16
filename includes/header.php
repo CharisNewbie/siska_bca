@@ -19,7 +19,6 @@ $userInitial = strtoupper(substr($user['username'] ?? 'U', 0, 1));
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="<?= APP_NAME ?> - Sistem Informasi Surat Kuasa <?= APP_CABANG ?>">
-    <meta name="author" content="BCA">
     <meta name="robots" content="noindex, nofollow">
     
     <title><?= e($pageTitle) ?> — <?= APP_NAME ?> <?= APP_CABANG ?></title>
@@ -36,8 +35,6 @@ $userInitial = strtoupper(substr($user['username'] ?? 'U', 0, 1));
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js" defer></script>
 
     <!-- SISKA Custom CSS -->
     <link href="assets/css/style.css?v=<?= APP_VERSION ?>" rel="stylesheet">
@@ -79,11 +76,6 @@ $userInitial = strtoupper(substr($user['username'] ?? 'U', 0, 1));
             <i class="bi bi-people-fill"></i>
             <span>Kelola Pengguna</span>
         </a>
-        
-        <a href="audit_log.php" class="nav-item <?= $activeMenu === 'audit' ? 'active' : '' ?>">
-            <i class="bi bi-journal-text"></i>
-            <span>Log Aktivitas</span>
-        </a>
         <?php endif; ?>
     </nav>
 
@@ -95,7 +87,7 @@ $userInitial = strtoupper(substr($user['username'] ?? 'U', 0, 1));
                 <span class="user-role"><?= $user['role'] === 'admin' ? 'Administrator' : 'Teller' ?></span>
             </div>
         </div>
-        <a href="logout.php" class="btn-logout" title="Keluar" data-tooltip="Keluar">
+        <a href="logout.php" class="btn-logout" title="Keluar">
             <i class="bi bi-box-arrow-right"></i>
         </a>
     </div>

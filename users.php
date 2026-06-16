@@ -22,13 +22,11 @@ if ($statusMsg === 'success') {
 
 // ─── Proses POST: Tambah User ────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'tambah') {
-    verifyCsrf();
-
-    $username    = trim($_POST['username']    ?? '');
-    $nama        = trim($_POST['nama_lengkap']?? '');
-    $password    = $_POST['password']         ?? '';
-    $role        = $_POST['role']             ?? 'user';
-    $status      = $_POST['status']           ?? 'active';
+    $username    = trim($_POST['username'] ?? '');
+    $nama        = trim($_POST['nama_lengkap'] ?? '');
+    $password    = $_POST['password'] ?? '';
+    $role        = $_POST['role'] ?? 'user';
+    $status      = $_POST['status'] ?? 'active';
 
     // Validasi
     if ($username === '') $errors['username'] = 'NIP/Username wajib diisi.';
@@ -40,9 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'tamb
     if (empty($errors)) {
         try {
             // Cek duplikat
-            $check = $pdo->prepare("SELECT id FROM users WHERE username = ?");
-            $check->execute([$username]);
-            if ($check->fetch()) {
+            if (isUsernameExists($pdo, $username)) {
                 $errors['username'] = "Username '$username' sudah terdaftar.";
             } else {
                 $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
@@ -51,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'tamb
                 );
                 $stmt->execute([$username, $nama, $hash, $role, $status]);
 
-                auditLog($pdo, 'tambah_user', 'users', (int) $pdo->lastInsertId(), "Username: $username");
                 redirect('users.php?status=success');
             }
         } catch (PDOException $e) {
@@ -62,10 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'tamb
 }
 
 // ─── Query users ─────────────────────────────────────────────────────────
-$users = $pdo->query("SELECT * FROM users ORDER BY role ASC, username ASC")->fetchAll();
-
-// ─── Generate CSRF token untuk JavaScript ────────────────────────────────
-$csrf_token = csrfToken();
+$users = getAllUsers($pdo);
 
 require 'includes/header.php';
 ?>
@@ -164,14 +156,10 @@ require 'includes/header.php';
                         </td>
                         <td style="text-align:right;">
                             <?php if ($u['id'] !== (int)$me['id']): ?>
-                            <!-- PERBAIKAN: Gunakan form POST untuk hapus -->
-                            <form method="POST" action="hapus_user.php" style="display:inline;" onsubmit="return confirmHapusUser(event, <?= $u['id'] ?>, '<?= e($u['username']) ?>')">
-                                <input type="hidden" name="_csrf" value="<?= $csrf_token ?>">
-                                <input type="hidden" name="id" value="<?= $u['id'] ?>">
-                                <button type="submit" class="btn-danger-ghost" title="Hapus Pengguna">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
+                            <a href="javascript:void(0)" onclick="confirmHapusUser(<?= $u['id'] ?>, '<?= e($u['username']) ?>')"
+                               class="btn-danger-ghost" title="Hapus Pengguna">
+                                <i class="bi bi-trash"></i>
+                            </a>
                             <?php else: ?>
                             <span style="font-size:.75rem;color:var(--gray-400);" title="Akun Anda">
                                 <i class="bi bi-shield-lock"></i>
@@ -206,7 +194,6 @@ require 'includes/header.php';
         <?php endif; ?>
 
         <form method="POST" novalidate>
-            <input type="hidden" name="_csrf" value="<?= $csrf_token ?>">
             <input type="hidden" name="_action" value="tambah">
 
             <div class="form-group">
@@ -274,28 +261,11 @@ require 'includes/header.php';
 <?php
 $extraScripts = <<<JS
 <script>
-// PERBAIKAN: Fungsi konfirmasi hapus dengan form submit
-function confirmHapusUser(event, id, nama) {
-    event.preventDefault();
-    
-    Swal.fire({
-        title: 'Hapus Pengguna?',
-        html: `Akses login untuk <strong>\${nama}</strong> akan dihapus permanen.`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#DC2626',
-        cancelButtonColor: '#64748B',
-        confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batal',
-        reverseButtons: true,
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Submit form yang sesuai
-            event.target.closest('form').submit();
-        }
-    });
-    
-    return false;
+// Fungsi konfirmasi hapus user
+function confirmHapusUser(id, nama) {
+    if (confirm('Hapus pengguna "' + nama + '"? Semua data terkait akan dihapus.')) {
+        window.location.href = 'hapus_user.php?id=' + id;
+    }
 }
 
 // Modal functions

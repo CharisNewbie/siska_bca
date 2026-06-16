@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Regenerate session ID untuk keamanan
                 session_regenerate_id(true);
 
-                $_SESSION['user_id']  = $user['id'];
+                $_SESSION['user_id']  = (int)$user['id'];
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['nama']     = $user['nama_lengkap'] ?? $user['username'];
                 $_SESSION['role']     = $user['role'];
@@ -36,29 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?")
                     ->execute([$user['id']]);
 
-                // CATAT LOGIN BERHASIL
-                auditLog(
-                    $pdo, 
-                    'login', 
-                    'users', 
-                    $user['id'], 
-                    "Login berhasil - {$user['username']} ({$user['nama_lengkap']})"
-                );
-
                 redirect('index.php');
             } else {
-                // CATAT LOGIN GAGAL
-                $errorMsg = 'NIP atau password salah, atau akun tidak aktif.';
-                $error = $errorMsg;
-                
-                auditLog(
-                    $pdo, 
-                    'login_gagal', 
-                    'users', 
-                    $user['id'] ?? null, 
-                    "Login gagal - Username: $username" . ($user ? " (Status: {$user['status']})" : " (User tidak ditemukan)")
-                );
-                
+                $error = 'NIP atau password salah, atau akun tidak aktif.';
                 // Delay untuk mencegah brute force
                 sleep(1);
             }

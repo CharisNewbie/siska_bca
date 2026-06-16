@@ -15,26 +15,8 @@ $totalUsers  = (int) $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
 $search = trim($_GET['q'] ?? '');
 $filter = $_GET['filter'] ?? ''; // 'setoran' | 'tarikan' | ''
 
-$where   = [];
-$params  = [];
-
-if ($search !== '') {
-    $where[]  = "(nomor_rekening LIKE ? OR nama_pemilik LIKE ? OR nama_penerima LIKE ? OR nomor_surat LIKE ?)";
-    $term     = "%$search%";
-    $params   = array_merge($params, [$term, $term, $term, $term]);
-}
-
-if ($filter === 'setoran' || $filter === 'tarikan') {
-    $where[]  = "jenis_kuasa = ?";
-    $params[] = strtoupper($filter);
-}
-
-$whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
-
 try {
-    $stmt = $pdo->prepare("SELECT * FROM surat_kuasa $whereSql ORDER BY created_at DESC");
-    $stmt->execute($params);
-    $rows = $stmt->fetchAll();
+    $rows = getSuratKuasa($pdo, $search, $filter);
 } catch (PDOException $e) {
     error_log('[SISKA] Dashboard query error: ' . $e->getMessage());
     $rows = [];
@@ -108,8 +90,7 @@ require 'includes/header.php';
     <!-- Filter Jenis -->
     <div style="display:flex;gap:.4rem;flex-shrink:0;">
         <a href="index.php<?= $search ? '?q='.urlencode($search) : '' ?>"
-           class="btn-ghost <?= $filter === '' ? 'active' : '' ?>"
-           style="<?= $filter === '' ? 'background:var(--gray-100);color:var(--gray-900);' : '' ?>">
+           class="btn-ghost <?= $filter === '' ? 'active' : '' ?>">
             Semua
         </a>
         <a href="index.php?filter=setoran<?= $search ? '&q='.urlencode($search) : '' ?>"
@@ -208,10 +189,10 @@ require 'includes/header.php';
                 <a href="tambah.php?edit=<?= $row['id'] ?>" class="btn-ghost" style="padding:.45rem .75rem;font-size:.82rem;">
                     <i class="bi bi-pencil"></i>
                 </a>
-                <button onclick="confirmDelete(<?= $row['id'] ?>, '<?= e($row['nama_pemilik']) ?>')"
-                        class="btn-danger-ghost" style="padding:.45rem .75rem;font-size:.82rem;">
+                <a href="javascript:void(0)" onclick="confirmDelete(<?= $row['id'] ?>, '<?= e($row['nama_pemilik']) ?>')"
+                   class="btn-danger-ghost" style="padding:.45rem .75rem;font-size:.82rem;">
                     <i class="bi bi-trash"></i>
-                </button>
+                </a>
                 <?php endif; ?>
             </div>
 
@@ -232,19 +213,9 @@ require 'includes/header.php';
 $extraScripts = <<<'JS'
 <script>
 function confirmDelete(id, nama) {
-    Swal.fire({
-        title: 'Hapus Surat Kuasa?',
-        html: `Data atas nama <strong>${nama}</strong> akan dihapus permanen.`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#DC2626',
-        cancelButtonColor: '#64748B',
-        confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batal',
-        reverseButtons: true,
-    }).then(r => {
-        if (r.isConfirmed) window.location.href = 'hapus.php?id=' + id + '&_csrf=<?= csrfToken() ?>';
-    });
+    if (confirm('Hapus surat kuasa atas nama "' + nama + '"?')) {
+        window.location.href = 'hapus.php?id=' + id;
+    }
 }
 </script>
 JS;

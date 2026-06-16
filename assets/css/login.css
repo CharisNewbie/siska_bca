@@ -2,7 +2,6 @@
    SISKA BCA — Login Page Styles
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ─── Reset & Base ──────────────────────────────────────────────────────────── */
 * {
     margin: 0;
     padding: 0;
@@ -75,10 +74,6 @@ body {
     font-weight: 700;
     color: #0A2647;
     letter-spacing: -0.5px;
-}
-
-.login-header h1 span {
-    color: #0060AF;
 }
 
 .login-header p {
@@ -168,11 +163,6 @@ body {
     border-color: #0060AF;
     background: #ffffff;
     box-shadow: 0 0 0 4px rgba(0, 96, 175, 0.08);
-}
-
-.input-group .form-control:focus + .input-icon,
-.input-group .form-control:focus ~ .input-icon {
-    color: #0060AF;
 }
 
 .input-group .form-control::placeholder {
@@ -265,24 +255,6 @@ body {
     font-weight: 600;
 }
 
-.login-footer .links {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    margin-top: 0.5rem;
-}
-
-.login-footer .links a {
-    font-size: 0.75rem;
-    color: #6B7A8F;
-    text-decoration: none;
-    transition: color 0.3s;
-}
-
-.login-footer .links a:hover {
-    color: #0060AF;
-}
-
 /* ─── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
     .login-box {
@@ -296,10 +268,5 @@ body {
 
     .login-header h1 {
         font-size: 1.3rem;
-    }
-
-    .login-footer .links {
-        gap: 1rem;
-        flex-wrap: wrap;
     }
 }

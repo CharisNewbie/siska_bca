@@ -4,21 +4,6 @@
  */
 require 'config/db.php';
 
-// Catat aktivitas logout SEBELUM session dihapus
-if (isLoggedIn()) {
-    try {
-        auditLog(
-            $pdo, 
-            'logout', 
-            null, 
-            null, 
-            'User logout - ' . ($_SESSION['username'] ?? 'Unknown')
-        );
-    } catch (Exception $e) {
-        error_log('[SISKA] Logout audit error: ' . $e->getMessage());
-    }
-}
-
 // Hapus semua data session
 $_SESSION = [];
 
@@ -40,4 +25,4 @@ if (ini_get("session.use_cookies")) {
 session_destroy();
 
 // Redirect ke halaman login
-redirect('login.php?status=info&msg=Anda+telah+keluar+dari+sistem.');
+redirect('login.php?info=' . urlencode('Anda telah keluar dari sistem.'));
