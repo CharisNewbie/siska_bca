@@ -1,0 +1,17 @@
+# Upload folder (kecuali .gitkeep)
+assets/uploads/*
+!assets/uploads/.gitkeep
+
+# Log files
+*.log
+
+# Environment
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
